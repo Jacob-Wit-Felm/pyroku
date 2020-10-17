@@ -9,16 +9,18 @@ api_id = environ.get('API_ID')
 api_hash = environ.get("API_HASH")
 info = "Greetings from **Heroku**!"
 
-s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
+s3 = S3Connection(os.environ.get('S3_KEY'), os.environ.get('S3_SECRET'))
 
-print(api_id + "" +api_hash)
+print(api_id)
+print(api_hash)
 print(s3)
-# app = Client(":memory:", api_id, api_hash)
 
-# print(info)
+app = Client(":memory:", api_id, api_hash)
 
-# @app.on_message()
-# def work(client, message):
-#     app.send_message(message.chat.id, info)
+print(info)
 
-# app.run()
+@app.on_message()
+def work(client, message):
+    app.send_message(message.chat.id, info)
+
+app.run()
