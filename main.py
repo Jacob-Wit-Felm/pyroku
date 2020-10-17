@@ -6,7 +6,7 @@ api_id = environ.get('API_ID')
 api_hash = environ.get("API_HASH")
 info = "Greetings from **Heroku**!"
 
-app = Client("my_account")
+app = Client("my_account", api_id, api_hash)
 
 print(info)
 
