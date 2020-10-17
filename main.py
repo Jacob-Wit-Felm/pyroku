@@ -2,8 +2,10 @@ import os
 from os import environ
 from pyrogram import Client
 
+print(environ['API_ID'])
+
 api_id = environ.get('API_ID')
-api_hash = environ.get("API_HASH")
+api_hash = environ.get('API_HASH')
 info = "Greetings from **Heroku**!"
 
 app = Client("my_account", api_id, api_hash)
