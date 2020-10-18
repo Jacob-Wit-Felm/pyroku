@@ -1,9 +1,9 @@
 {
-  "name": "Pyroku",
-  "description": "A Pyrogram bot, which can easily be deployed to Heroku.",
-  "repository": "https://github.com/fgallaire/Pyroku",
-  "logo": "https://avatars1.githubusercontent.com/u/34474300?s=280&v=4",
-  "keywords": ["python", "pyrogram", "telegram", "userbot", "pyroku"],
+  "name": "fast-stream-96282",
+  "description": "",
+  "repository": "",
+  "logo": "",
+  "keywords": ["python"],
   "image": "heroku/python",
   "formation": {
     "worker": {
@@ -13,10 +13,10 @@
   },
   "env": {
     "API_ID": {
-      "description": "App api_id from https://my.telegram.org"
+      "description": ""
     },
     "API_HASH": {
-      "description": "App api_hash from https://my.telegram.org"
+      "description": ""
     },
   }
 }

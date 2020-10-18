@@ -48,29 +48,25 @@ def new_img(client, message):
 
 		random_channel_num = random.randint(0, len(channels)-1)
 		random_channel = channels[random_channel_num]
+
 		while 1:
-			mistake = 0
+			actions = 0
 			random_img = random.randint(0, random_channel[2])
 
 			sourse_message = client.get_history(chat_id = random_channel[0], offset = random_img, limit = 1)[0]
 
-			try:
-				client.send_photo(message.chat.id, photo = sourse_message["photo"]["file_id"], file_ref = sourse_message["photo"]["file_ref"])
-			except:
-				mistake += 1
-			try:
-				client.send_video(message.chat.id, video = sourse_message["video"]["file_id"], file_ref = sourse_message["video"]["file_ref"])
-			except:
-				mistake += 1
-			try:
-				client.send_animation(message.chat.id, animation = sourse_message["animation"]["file_id"], file_ref = sourse_message["animation"]["file_ref"])
-			except:
-				mistake += 1
 
-			print(mistake)
-			if mistake != 3:
+			if sourse_message.photo != None:
+				client.send_photo(message.chat.id, photo = sourse_message["photo"]["file_id"], file_ref = sourse_message["photo"]["file_ref"])
 				break
-			print("misake")
+			elif sourse_message.video != None:
+				client.send_video(message.chat.id, video = sourse_message["video"]["file_id"], file_ref = sourse_message["video"]["file_ref"])
+				break
+			elif sourse_message.animation != None:
+				client.send_animation(message.chat.id, animation = sourse_message["animation"]["file_id"], file_ref = sourse_message["animation"]["file_ref"])
+				break
+			else:
+				print("mistakes")
 
 @app.on_message(filters.command(["add"]))
 def add_channel(client, message):
@@ -215,5 +211,46 @@ def set_gender(client, message):
 
 		except:
 			message.reply_text("Even you make mistakes👌 Just take your time~")
+
+@app.on_message(filters.command(["list"]) & filters.user(admin))
+def list_them_all(client, message):
+	if message.chat.id in allowed_groups:
+		conn = sqlite3.connect("database")
+
+		cur = conn.cursor()
+
+		sql = """	SELECT id, title, gender FROM Channels
+		"""
+
+		operation = cur.execute(sql)
+		channels = operation.fetchall()
+
+		for channel in channels:	
+			client.send_message(message.chat.id, "{} <br> {} <br> {}".format(channel[0], channel[1], channel[2]), parse_mode='html')
+		conn.close()
+
+@app.on_message(filters.command(["delete"]) & filters.user(admin))
+def delete_channel(client, message):
+	if message.chat.id in allowed_groups:
+		conn = sqlite3.connect("database")
+
+		cur = conn.cursor()
+		try: 
+			text = message.text.split("/delete ")[1]
+			info = text.split()
+			channel_id = info[0]
+
+			sql = """	DELETE FROM Channels
+						WHERE id = ?
+			"""
+			operation = cur.execute(sql, (channel_id,))
+		except:
+			print("Something went wrong")
+
+		message.reply_text("I did it")
+		conn.commit()
+		conn.close()
+
+
 
 app.run()
