@@ -8,6 +8,7 @@ from pyrogram.errors import BadRequest, FloodWait
 import sqlite3
 
 import datetime
+import random
 
 api_id = environ.get('API_ID')
 api_hash = environ.get('API_HASH')
@@ -16,16 +17,66 @@ allowed_groups = [-1001317920976, -1001339765569]
 
 app = Client("my_account", api_id, api_hash)
 
-@app.on_message(filters.command(["hey"]))
-def innitiation(client, message):
+@app.on_message(filters.command(["new"]))
+def new_img(client, message):
 	if message.chat.id in allowed_groups:
-		app.send_message(message.chat.id, hey)
+		conn = sqlite3.connect("database")
+		cur = conn.cursor()
+		
+		try:
+			text = message.text.split("/new ")[1]
+			print("gender is " + text)
+			gender = text.split()
 
-@app.on_message(filters.command(["straight"]))
-def straight(client, message):
-	if message.chat.id in allowed_groups:
-		client.send_message(message.chat.id, hey)
-		client.send_photo(chat_id=message.chat.id, photo = "https://images.unsplash.com/photo-1581456495146-65a71b2c8e52?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=333&q=80")
+			sql = """	SELECT id, title, volume from Channels
+						WHERE gender = ?
+			"""
+			operation = cur.execute(sql, (gender))
+			channels = operation.fetchall()
+
+			if len(channels) == 0:
+				client.send_message(text = "Dear, try better 😉 There is no such a gender", chat_id = message.chat.id, reply_to_message_id = message.message_id)
+		except:
+			print("going random")
+
+			sql = """	SELECT id, title, volume from Channels
+						WHERE gender IS NOT NULL
+			"""
+			operation = cur.execute(sql)
+			channels = operation.fetchall()
+
+		print(channels)
+		conn.close()
+
+		random_channel_num = random.randint(0, len(channels)-1)
+		random_channel = channels[random_channel_num]
+		random_img = random.randint(0, random_channel[2])
+
+		print(random_channel)
+		print(random_img)
+
+		sourse_message = client.get_history(chat_id = random_channel[0], offset = random_img, limit = 1)[0]
+
+		print(sourse_message)
+
+		try:
+			if sourse_message["photo"]:
+				client.send_photo(message.chat.id, photo = sourse_message["photo"]["file_id"], file_ref = sourse_message["photo"]["file_ref"])
+		except:
+			pass
+		try:
+			if sourse_message["video"]:
+				client.send_video(message.chat.id, video = sourse_message["video"]["file_id"], file_ref = sourse_message["video"]["file_ref"])
+		except:
+			pass
+		try:
+			if sourse_message["animation"]:
+				client.send_animation(message.chat.id, animation = sourse_message["animation"]["file_id"], file_ref = sourse_message["animation"]["file_ref"])
+		except:
+			pass
+
+		print(sourse_message.animation)
+		# client.send_photo(message.chat.id, file_ref)
 
 
 @app.on_message(filters.command(["add"]))
@@ -104,7 +155,7 @@ def updare(client, message):
 				cur.execute(sql, (channel_volume, datetime.datetime.now(), channel[0]))
 
 			else:
-				client.send_message(message.chat.id, "No need in update")
+				client.send_message(message.chat.id, "No need update in {}".format(channel[2]))
 		conn.commit()
 		conn.close()
 
